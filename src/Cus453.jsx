@@ -54,6 +54,7 @@ const Cus453 = () => {
       });
       if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
+      console.log('Response data:', data); // Log response data
       setUsers([...users, { ...newUser, _id: data.insertedId, daysDifference: 0 }]);
       setNewUser({
         email: '',
@@ -64,6 +65,7 @@ const Cus453 = () => {
       console.error('Error adding user:', error);
     }
   };
+  
   
 
   if (loading) return <p>Loading...</p>;

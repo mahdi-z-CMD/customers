@@ -27,3 +27,11 @@
 .cards h1 img{
   margin-left: 5%;
 }
+@media only screen and (max-width: 500px) {
+  .cards h1{
+    font-size: 14px;
+  }
+  .cards{
+    width: 80%;
+  }
+}

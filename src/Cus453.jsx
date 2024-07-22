@@ -10,11 +10,15 @@ const Cus453 = () => {
     date: '',
     telegramId: ''
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('https://api-vpn.netlify.app/.netlify/functions/getlist')
-      .then(response => response.json())
-      .then(data => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch('https://api-vpn.netlify.app/.netlify/functions/getlist');
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
         const updatedUsers = data.map(user => {
           const currentDate = new Date();
           const targetDate = new Date(user.date);
@@ -23,8 +27,14 @@ const Cus453 = () => {
           return { ...user, daysDifference: differenceInDays };
         });
         setUsers(updatedUsers);
-      })
-      .catch(error => console.error('Error fetching users:', error));
+      } catch (error) {
+        setError('Error fetching users: ' + error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
   }, []);
 
   const handleInputChange = (e) => {
@@ -32,26 +42,32 @@ const Cus453 = () => {
     setNewUser({ ...newUser, [name]: value });
   };
 
-  const handleAddUser = (e) => {
+  const handleAddUser = async (e) => {
     e.preventDefault();
-    fetch('https://api-vpn.netlify.app/.netlify/functions/adduser', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(newUser),
-    })
-      .then(response => response.json())
-      .then(data => {
-        setUsers([...users, { ...newUser, _id: data.insertedId, daysDifference: 0 }]);
-        setNewUser({
-          email: '',
-          date: '',
-          telegramId: ''
-        });
-      })
-      .catch(error => console.error('Error adding user:', error));
+    try {
+      const response = await fetch('https://api-vpn.netlify.app/.netlify/functions/adduser', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newUser),
+      });
+      if (!response.ok) throw new Error('Network response was not ok');
+      const data = await response.json();
+      setUsers([...users, { ...newUser, _id: data.insertedId, daysDifference: 0 }]);
+      setNewUser({
+        email: '',
+        date: '',
+        telegramId: ''
+      });
+    } catch (error) {
+      console.error('Error adding user:', error);
+    }
   };
+  
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
 
   return (
     <div className="App">
@@ -81,13 +97,17 @@ const Cus453 = () => {
         />
         <button type="submit">Add User</button>
       </form>
-      {users.map(user => (
-        <div className="cards" key={user._id}>
-          <h1>id: {user._id}</h1>
-          <h1>email: {user.email}</h1>
-          <h1>Days: {user.daysDifference} <img src={user.daysDifference >= 31 ? closeicon : checkmark} alt="close icon" width="24px" height="24px"/></h1>
-        </div>
-      ))}
+      {users.length === 0 ? (
+        <p>No users found.</p>
+      ) : (
+        users.map(user => (
+          <div className="cards" key={user._id}>
+            <h1>id: {user._id}</h1>
+            <h1>email: {user.email}</h1>
+            <h1>Days: {user.daysDifference} <img src={user.daysDifference >= 31 ? closeicon : checkmark} alt="icon" width="24px" height="24px"/></h1>
+          </div>
+        ))
+      )}
     </div>
   );
 }

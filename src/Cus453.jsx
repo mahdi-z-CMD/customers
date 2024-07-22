@@ -12,7 +12,7 @@ const Cus453 = () => {
   });
 
   useEffect(() => {
-    fetch('/api/getlist')
+    fetch('https://api-vpn.netlify.app/.netlify/functions/getlist')
       .then(response => response.json())
       .then(data => {
         const updatedUsers = data.map(user => {
@@ -34,7 +34,7 @@ const Cus453 = () => {
 
   const handleAddUser = (e) => {
     e.preventDefault();
-    fetch('/api/adduser', {
+    fetch('https://api-vpn.netlify.app/.netlify/functions/adduser', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -43,7 +43,7 @@ const Cus453 = () => {
     })
       .then(response => response.json())
       .then(data => {
-        setUsers([...users, { ...newUser, id: data.insertedId, daysDifference: 0 }]);
+        setUsers([...users, { ...newUser, _id: data.insertedId, daysDifference: 0 }]);
         setNewUser({
           email: '',
           date: '',
@@ -82,9 +82,8 @@ const Cus453 = () => {
         <button type="submit">Add User</button>
       </form>
       {users.map(user => (
-        <div className="cards" key={user.id}>
-          <h1>id: {user.id}</h1>
-          <h1>username: {user.username}</h1>
+        <div className="cards" key={user._id}>
+          <h1>id: {user._id}</h1>
           <h1>email: {user.email}</h1>
           <h1>Days: {user.daysDifference} <img src={user.daysDifference >= 31 ? closeicon : checkmark} alt="close icon" width="24px" height="24px"/></h1>
         </div>

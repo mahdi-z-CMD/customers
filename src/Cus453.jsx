@@ -37,11 +37,6 @@ const Cus453 = () => {
     fetchUsers();
   }, []);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewUser({ ...newUser, [name]: value });
-  };
-
   const handleAddUser = async (e) => {
     e.preventDefault();
     try {
@@ -52,9 +47,13 @@ const Cus453 = () => {
         },
         body: JSON.stringify(newUser),
       });
-      if (!response.ok) throw new Error('Network response was not ok');
+  
+      if (!response.ok) {
+        const errorText = await response.text(); // Read error response text
+        throw new Error(`Network response was not ok: ${response.status} ${errorText}`);
+      }
+  
       const data = await response.json();
-      console.log('Response data:', data); // Log response data
       setUsers([...users, { ...newUser, _id: data.insertedId, daysDifference: 0 }]);
       setNewUser({
         email: '',
@@ -63,8 +62,11 @@ const Cus453 = () => {
       });
     } catch (error) {
       console.error('Error adding user:', error);
+      // Optionally, display an error message to the user
+      setError('Error adding user: ' + error.message);
     }
   };
+  
   
   
 
